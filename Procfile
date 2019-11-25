@@ -1,2 +1,1 @@
-web: bundle exec rails server -p $PORT
-web: gunicorn racing.wsgi
+web: gunicorn vietnamracing.wsgi --log-file -
