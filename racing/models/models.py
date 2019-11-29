@@ -4,7 +4,6 @@ from djongo import models
 
 
 class Biker(models.Model):
-    id = models.IntegerField(auto_created=True, default=1, primary_key=True)
     name = models.CharField(max_length=30, null=False)
     phone = models.CharField(max_length=15, null=False)
     email = models.CharField(max_length=100, null=True)
@@ -15,7 +14,6 @@ class Biker(models.Model):
 
 
 class Post(models.Model):
-    id = models.IntegerField(auto_created=True, default=1, primary_key=True)
     biker_id = models.CharField(max_length=24, null=False)
     status = models.TextField(null=True)
 
