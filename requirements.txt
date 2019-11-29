@@ -1,3 +1,4 @@
+django
 djangorestframework==3.9.3
 djongo==1.2.29
 pymongo==3.9.0
