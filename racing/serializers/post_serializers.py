@@ -1,14 +1,11 @@
 from rest_framework import serializers
 
-from racing.models.models import Post
 
-
-class PostSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Post
-        fields = '__all__'
+class PostListParamSerializer(serializers.Serializer):
+    biker_id = serializers.IntegerField(required=False)
+    post_id = serializers.IntegerField(required=False)
 
 
 class CreatePostSerializer(serializers.Serializer):
-    biker_id = serializers.IntegerField()
-    status = serializers.CharField()
+    biker_id = serializers.IntegerField(required=True)
+    status = serializers.CharField(required=True)

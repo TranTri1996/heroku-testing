@@ -8,6 +8,7 @@ class Biker(models.Model):
     phone = models.CharField(max_length=15, null=False)
     email = models.CharField(max_length=100, null=True)
     address_id = models.IntegerField(null=False)
+    user_name = models.CharField(max_length=30, null=False)
 
     def __str__(self):
         return self.name

@@ -2,9 +2,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 
-class sign_up(APIView):
+class SignUp(APIView):
 
-    def get(self, request):
+    def post(self, request):
 
         return Response()
 
