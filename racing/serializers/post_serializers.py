@@ -1,11 +1,12 @@
-from rest_framework import serializers
+from rest_framework_mongoengine.serializers import DocumentSerializer
+from racing.serializers.image_serializers import ImageSerializer
+from racing.models.models import Post, Image
 
 
-class PostListParamSerializer(serializers.Serializer):
-    biker_id = serializers.IntegerField(required=False)
-    post_id = serializers.IntegerField(required=False)
+class PostSerializer(DocumentSerializer):
+    images = ImageSerializer(Image)
 
-
-class CreatePostSerializer(serializers.Serializer):
-    biker_id = serializers.IntegerField(required=True)
-    status = serializers.CharField(required=True)
+    class Post:
+        model = Post
+        depth = 2
+        fields = '__all__'
