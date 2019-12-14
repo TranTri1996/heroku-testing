@@ -1,35 +1,45 @@
 from racing.base.base_views import GetAPIView, PostAPIView
 from racing.mangers.post_manager import generate_post_response
-from racing.models.models import Post
-from racing.constants import Result
+from racing.models.models import Post, Biker
+from racing.constants import Result, PostResponseMsg
+from racing.serializers.post_serializers import PostListSerializer, PostCreateSerializer
 
 
 class PostListAllView(GetAPIView):
+    serializer_class = PostListSerializer
 
     def process(self, data):
-        posts = Post.objects.all()
-        if data.get("post_id"):
-            posts = posts.filter(id=data["post_id"])
+        posts = list(Post.objects.all())
         if data.get("biker_id"):
-            posts = posts.filter(biker_id=data["biker_id"])
-
-        post_responses = []
+            posts = list(p for p in posts if p.biker_id == data["biker_id"])
+        if data.get("post_id"):
+            posts = list(p for p in posts if p.biker_id == data["post_id"])
+        post_serializers = []
         for p in posts:
-            post_responses.append(generate_post_response(p))
+            post_serializers.append(generate_post_response(p))
 
-        return Result.SUCCESS, post_responses
+        return Result.SUCCESS, post_serializers
 
 
 class PostCreateView(PostAPIView):
+    class_serializer = PostCreateSerializer
 
     def process(self, data):
-        post = Post.objects.create(author_id=data["author_id"],
-                                   like_number=data["like_number"],
-                                   share_number=data["share_number"],
-                                   view_number=data["view_number"],
-                                   title=data["title"],
-                                   description=data["description"],
-                                   images=data["images"],
-                                   comment_ids=data["comment_ids"])
+        self.validate_data(data)
+        post = Post.objects.create(biker_id=data["biker_id"],
+                                   title=data.get("title", ""),
+                                   description=data.get("description", ""),
+                                   is_active=data.get("is_active", 1))
 
-        return Result.SUCCESS, {"id": post.id}
+        return Result.SUCCESS, generate_post_response(post)
+
+    def validate_data(self, data):
+        if not data.get("biker_id"):
+            self.response_json(PostResponseMsg.ERROR_REQUIRED_BIKER_ID)
+        if not self.is_biker_existed(data["biker_id"]):
+            self.response_json(PostResponseMsg.ERROR_BIKER_IS_NOT_EXISTED)
+
+    def is_biker_existed(self, biker_id):
+        biker = Biker.objects.filter(id=biker_id).first()
+
+        return True if biker else False

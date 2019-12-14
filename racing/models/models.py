@@ -26,10 +26,10 @@ class Biker(models.Model):
     user_name = models.CharField(max_length=50, null=False)
     phone = models.CharField(max_length=15, unique=True)
     email = models.CharField(max_length=100)
-    hash_password = models.CharField(max_length=100, null=False, default="")
-    password_salt = models.CharField(max_length=128)
+    hashed_password = models.CharField(max_length=100, null=False, default="")
+    password_salt = models.CharField(max_length=128, default="")
     is_active = models.BooleanField(default=1)
-    main_address_id = models.IntegerField(null=True)
+    main_address_id = models.IntegerField(null=True, default=-1)
     date_of_birth = models.DateField(null=True)
     gender = models.SmallIntegerField(default=0)
     job = models.CharField(max_length=50, default="")
@@ -43,7 +43,7 @@ class Biker(models.Model):
 
 
 class PostImage(models.Model):
-    post_id = models.IntegerField()
+    post_id = models.IntegerField(default=-1)
     url = models.CharField(max_length=255, null=False)
 
     class Meta:
@@ -51,13 +51,14 @@ class PostImage(models.Model):
 
 
 class Post(models.Model):
-    author_id = models.ForeignKey(Biker, on_delete=models.CASCADE, default="", blank=True)
+    biker_id = models.IntegerField(default=-1)
     like_number = models.IntegerField(null=False, default=0)
     share_number = models.IntegerField(null=False, default=0)
     view_number = models.IntegerField(null=False, default=0)
     title = models.CharField(max_length=255, null=False, default="")
     description = models.TextField(null=True, default="")
-    created_time = models.DateTimeField(auto_now_add=True, blank=True)
+    is_active = models.SmallIntegerField(default=1)  # default is active
+    created_time = models.DateTimeField(auto_now_add=True)
     updated_time = models.DateTimeField(auto_now_add=True, blank=True)
 
     class Meta:
@@ -65,36 +66,38 @@ class Post(models.Model):
 
 
 class Comment(models.Model):
-    post_id = models.ForeignKey(Post, on_delete=models.CASCADE, default="", blank=True)
-    author_id = models.ForeignKey(Biker, on_delete=models.CASCADE, default="", blank=True)
+    comment_parent_id = models.IntegerField(default=-1)  # default is have no parent
+    biker_id = models.IntegerField(default=-1)
+    post_id = models.IntegerField(default=-1)
+    accessory_id = models.IntegerField(default=-1)
     content = models.TextField(default="")
-    created_time = models.DateTimeField(auto_now_add=True, blank=True)
-    updated_time = models.DateTimeField(auto_now_add=True, blank=True)
+    created_time = models.DateTimeField(auto_now_add=True)
+    updated_time = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = "comment_tab"
 
-    def __str__(self):
-        return self.content
-
 
 class Like(models.Model):
-    comment_id = models.ForeignKey(Comment, on_delete=models.CASCADE, default="", blank=True)
-    post_id = models.ForeignKey(Post, on_delete=models.CASCADE, default="", blank=True)
-    author_id = models.ForeignKey(Biker, on_delete=models.CASCADE, default="", blank=True)
-    created_time = models.DateTimeField(auto_now_add=True, blank=True)
-    updated_time = models.DateTimeField(auto_now_add=True, blank=True)
+    comment_id = models.IntegerField(default=-1)  # not belong comment
+    post_id = models.IntegerField(default=-1)  # not belong post
+    biker_id = models.IntegerField(default=-1)  # not belong biker
+    accessory_id = models.IntegerField(default=-1)  # not belong accessory
+    created_time = models.DateTimeField(auto_now_add=True)
+    updated_time = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = "like_tab"
 
 
 class Accessory(models.Model):
-    owner_id = models.ForeignKey(Biker, on_delete=models.CASCADE, default="", blank=True)
+    biker_id = models.IntegerField(default=-1)
     name = models.CharField(max_length=100, null=False, default="")
     description = models.TextField(null=True, default="")
-    price = models.DecimalField(null=False, default=0.0, decimal_places=3, max_digits=20)
+    unit_price = models.DecimalField(decimal_places=2, max_digits=20, default=0.0)
+    market_price = models.DecimalField(decimal_places=2, max_digits=20, default=0.0)
     like_number = models.IntegerField(null=False, default=0)
+    is_active = models.SmallIntegerField(default=0)
     created_time = models.DateTimeField(auto_now_add=True, blank=True)
     updated_time = models.DateTimeField(auto_now_add=True, blank=True)
 

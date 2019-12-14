@@ -9,6 +9,7 @@ urlpatterns = [
     url('auth/sign_up', auth_views.SignUp.as_view()),
 
     url('biker/list$', biker_views.BikerListAllView.as_view()),
+    url('biker/create$', biker_views.BikerCreateView.as_view()),
 
     url('post/list$', post_views.PostListAllView.as_view()),
     url('post/create$', post_views.PostCreateView.as_view()),
