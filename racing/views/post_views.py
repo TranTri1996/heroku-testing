@@ -22,7 +22,6 @@ class PostListAllView(GetAPIView):
 
 class PostCreateView(PostAPIView):
 
-
     def process(self, data):
         post = Post.objects.create(author_id=data["author_id"],
                                    like_number=data["like_number"],
