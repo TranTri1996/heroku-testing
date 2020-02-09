@@ -1,11 +1,9 @@
-import json
-
 from rest_framework.views import APIView
 from racing.base import encoders
 from racing.constants import Result
 from rest_framework.response import Response
 
-from racing.serializers.base_serializers import DumSerialize
+from racing.serializers import DumSerialize
 
 
 class BaseView(APIView):

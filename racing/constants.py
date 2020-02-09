@@ -1,3 +1,6 @@
+import enum
+
+
 class Result(object):
     SUCCESS = "success"
     ERROR_PARAMS = "error_params"
@@ -23,4 +26,11 @@ class BikerResponseMsg(object):
     ERROR_PASSWORD_SHOULD_HAVE_AT_LEAST_ONE_UPPER_CASE = "error_password_should_have_at_least_one_upper_case"
     ERROR_PASSWORD_SHOULD_HAVE_AT_LEAST_ONE_LOWER_CASE = "error_password_should_have_at_least_one_lower_case"
     ERROR_PASSWORD_SHOULD_HAVE_AT_LEAST_ONE_SPECIAL_SYMBOL = "error_password_should_have_at_least_one_special_symbol"
+    ERROR_EMAIL_EXISTED = "error_email_existed"
+    ERROR_PHONE_EXISTED = "error_phone_existed"
+    ERROR_PERMISSION_DENIED = "error_permission_denied"
 
+
+class Gender(enum.Enum):
+    MALE = 1,
+    FEMALE = 2

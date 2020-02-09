@@ -2,6 +2,21 @@ from __future__ import unicode_literals
 from django.db import models
 
 
+class Accessory(models.Model):
+    biker_id = models.IntegerField(default=-1)
+    name = models.CharField(max_length=100, null=False, default="")
+    description = models.TextField(null=True, default="")
+    unit_price = models.DecimalField(decimal_places=2, max_digits=20, default=0.0)
+    market_price = models.DecimalField(decimal_places=2, max_digits=20, default=0.0)
+    like_number = models.IntegerField(null=False, default=0)
+    is_active = models.SmallIntegerField(default=0)
+    created_time = models.DateTimeField(auto_now_add=True, blank=True)
+    updated_time = models.DateTimeField(auto_now_add=True, blank=True)
+
+    class Meta:
+        db_table = "accessory_tab"
+
+
 class BikerAddress(models.Model):
     address = models.CharField(max_length=255, default="")
     contact_name = models.CharField(max_length=255, default="")
@@ -25,7 +40,7 @@ class Biker(models.Model):
     full_name = models.CharField(max_length=50, null=False)
     user_name = models.CharField(max_length=50, null=False)
     phone = models.CharField(max_length=15, unique=True)
-    email = models.CharField(max_length=100)
+    email = models.CharField(max_length=100, unique=True)
     hashed_password = models.CharField(max_length=100, null=False, default="")
     password_salt = models.CharField(max_length=128, default="")
     is_active = models.BooleanField(default=1)
@@ -40,29 +55,6 @@ class Biker(models.Model):
 
     class Meta:
         db_table = "biker_tab"
-
-
-class PostImage(models.Model):
-    post_id = models.IntegerField(default=-1)
-    url = models.CharField(max_length=255, null=False)
-
-    class Meta:
-        db_table = "post_image_tab"
-
-
-class Post(models.Model):
-    biker_id = models.IntegerField(default=-1)
-    like_number = models.IntegerField(null=False, default=0)
-    share_number = models.IntegerField(null=False, default=0)
-    view_number = models.IntegerField(null=False, default=0)
-    title = models.CharField(max_length=255, null=False, default="")
-    description = models.TextField(null=True, default="")
-    is_active = models.SmallIntegerField(default=1)  # default is active
-    created_time = models.DateTimeField(auto_now_add=True)
-    updated_time = models.DateTimeField(auto_now_add=True, blank=True)
-
-    class Meta:
-        db_table = "post_tab"
 
 
 class Comment(models.Model):
@@ -90,16 +82,24 @@ class Like(models.Model):
         db_table = "like_tab"
 
 
-class Accessory(models.Model):
+class PostImage(models.Model):
+    post_id = models.IntegerField(default=-1)
+    url = models.CharField(max_length=255, null=False)
+
+    class Meta:
+        db_table = "post_image_tab"
+
+
+class Post(models.Model):
     biker_id = models.IntegerField(default=-1)
-    name = models.CharField(max_length=100, null=False, default="")
-    description = models.TextField(null=True, default="")
-    unit_price = models.DecimalField(decimal_places=2, max_digits=20, default=0.0)
-    market_price = models.DecimalField(decimal_places=2, max_digits=20, default=0.0)
     like_number = models.IntegerField(null=False, default=0)
-    is_active = models.SmallIntegerField(default=0)
-    created_time = models.DateTimeField(auto_now_add=True, blank=True)
+    share_number = models.IntegerField(null=False, default=0)
+    view_number = models.IntegerField(null=False, default=0)
+    title = models.CharField(max_length=255, null=False, default="")
+    description = models.TextField(null=True, default="")
+    is_active = models.SmallIntegerField(default=1)  # default is active
+    created_time = models.DateTimeField(auto_now_add=True)
     updated_time = models.DateTimeField(auto_now_add=True, blank=True)
 
     class Meta:
-        db_table = "accessory_tab"
+        db_table = "post_tab"

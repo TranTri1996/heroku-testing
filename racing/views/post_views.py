@@ -1,8 +1,8 @@
 from racing.base.base_views import GetAPIView, PostAPIView
 from racing.mangers.post_manager import generate_post_response
-from racing.models.models import Post, Biker
 from racing.constants import Result, PostResponseMsg
-from racing.serializers.post_serializers import PostListSerializer, PostCreateSerializer
+from racing.models import Post, Biker
+from racing.serializers import PostListSerializer, PostCreateSerializer
 
 
 class PostListAllView(GetAPIView):
@@ -35,9 +35,9 @@ class PostCreateView(PostAPIView):
 
     def validate_data(self, data):
         if not data.get("biker_id"):
-            self.response_json(PostResponseMsg.ERROR_REQUIRED_BIKER_ID)
+            self.response_json(PostResponseMsg.ERROR_REQUIRED_BIKER_ID, {})
         if not self.is_biker_existed(data["biker_id"]):
-            self.response_json(PostResponseMsg.ERROR_BIKER_IS_NOT_EXISTED)
+            self.response_json(PostResponseMsg.ERROR_BIKER_IS_NOT_EXISTED, {})
 
     def is_biker_existed(self, biker_id):
         biker = Biker.objects.filter(id=biker_id).first()
