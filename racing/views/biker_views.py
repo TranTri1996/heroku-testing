@@ -1,7 +1,4 @@
-import hashlib
-
 import jwt
-from rest_framework.permissions import AllowAny, IsAuthenticated
 from racing.base.base_views import GetAPIView, PostAPIView
 from racing.constants import BikerResponseMsg, Result
 from racing.mangers import biker_manager
@@ -14,7 +11,6 @@ from django.db.models import Q
 
 
 class BikerRegisterView(PostAPIView):
-    permission_classes = (AllowAny,)
     class_serializer = BikeRegisterSerializer
 
     def process(self, data):
@@ -69,7 +65,6 @@ class BikerRegisterView(PostAPIView):
 
 
 class BikerLoginView(GetAPIView):
-    permission_classes = (AllowAny,)
     class_serializer = BikerLoginSerializer
 
     def process(self, data):
@@ -107,7 +102,6 @@ class BikerLogoutView(PostAPIView):
 
 
 class BikerGetProfileView(GetAPIView):
-    permission_classes = (AllowAny,)
     class_serializer = BikerGetProfileSerializer
 
     def process(self, data):
@@ -119,8 +113,7 @@ class BikerGetProfileView(GetAPIView):
         return Result.ERROR_SERVER, {}
 
     def validate_data(self, data):
-        if not biker_manager.check_permission(data["biker_id"], data["token"]):
-            self.response_json(BikerResponseMsg.ERROR_PERMISSION_DENIED, {})
+        pass
 
 
 class BikerListAllView(GetAPIView):

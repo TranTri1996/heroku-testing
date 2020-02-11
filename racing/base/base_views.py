@@ -1,9 +1,11 @@
+import jwt
 from rest_framework.views import APIView
 from racing.base import encoders
 from racing.constants import Result
 from rest_framework.response import Response
 
 from racing.serializers import DumSerialize
+from vietnamracing import settings
 
 
 class BaseView(APIView):
@@ -44,7 +46,10 @@ class BaseView(APIView):
         raise self.__RespondJump
 
     def check_authen(self, request):
-        return True
+        token = request.auth
+        payload_decode = jwt.decode(token, settings.SECRET_KEY)
+        if payload_decode["id"] == request.user.id:
+            self.response_json("error_permission_denied", {})
 
 
 class GetAPIView(BaseView):
