@@ -1,17 +1,18 @@
 import jwt
+from rest_framework.permissions import IsAuthenticated, AllowAny
+
 from racing.base.base_views import GetAPIView, PostAPIView
 from racing.constants import BikerResponseMsg, Result
 from racing.mangers import biker_manager
 from racing.mangers.biker_manager import generate_biker_response
 from racing.models import Biker
-from racing.serializers import BikerLoginSerializer, BikerListSerializer, BikeRegisterSerializer, \
-    BikerGetProfileSerializer, BikerLogoutSerializer
-from vietnamracing import settings
+from racing.serializers import BikerListSerializer, BikeRegisterSerializer, BikerLogoutSerializer
 from django.db.models import Q
 
 
 class BikerRegisterView(PostAPIView):
     class_serializer = BikeRegisterSerializer
+    permission_classes = [AllowAny]
 
     def process(self, data):
         self.validate_data(data)
@@ -64,32 +65,8 @@ class BikerRegisterView(PostAPIView):
             self.response_json(BikerResponseMsg.ERROR_PASSWORD_SHOULD_HAVE_AT_LEAST_ONE_SPECIAL_SYMBOL, {})
 
 
-class BikerLoginView(GetAPIView):
-    class_serializer = BikerLoginSerializer
-
-    def process(self, data):
-        hashed_password = biker_manager.hash_password(data["password"])
-        biker = Biker.objects.filter(email=data["email"], hashed_password=hashed_password).first()
-        if biker:
-            token = self.generate_token(biker)
-            biker_info = biker_manager.generate_biker_response(biker)
-            biker_info["token"] = token
-            return Result.SUCCESS, biker_info
-
-        return Result.ERROR_SERVER, {}
-
-    def generate_token(self, biker):
-        payload = {
-            'id': biker.id,
-            'email': biker.email,
-            'username': biker.user_name
-        }
-        token = jwt.encode(payload, settings.SECRET_KEY)
-
-        return token
-
-
 class BikerLogoutView(PostAPIView):
+    permission_classes = [IsAuthenticated]
     class_serializer = BikerLogoutSerializer
 
     def process(self, data):
@@ -97,26 +74,31 @@ class BikerLogoutView(PostAPIView):
         return Result.SUCCESS, {}
 
     def validate_data(self, data):
-        if not biker_manager.check_permission(data["biker_id"], data["token"]):
-            self.response_json(BikerResponseMsg.ERROR_PERMISSION_DENIED, {})
+        return True
 
 
 class BikerGetProfileView(GetAPIView):
-    class_serializer = BikerGetProfileSerializer
+    permission_classes = [IsAuthenticated]
+    ERROR_USER_IS_NOT_EXISTED = "error_user_is_not_existed"
 
     def process(self, data):
         self.validate_data(data)
-        biker = Biker.objects.filter(id=data["biker_id"]).first()
-        if biker:
+        try:
+            biker = Biker.objects.filter(id=data["biker_id"]).first()
+            if not biker:
+                return self.response_json(self.ERROR_USER_IS_NOT_EXISTED, {})
+
             return Result.SUCCESS, biker_manager.generate_biker_response(biker)
 
-        return Result.ERROR_SERVER, {}
+        except Exception as e:
+            return Result.ERROR_SERVER, {}
 
     def validate_data(self, data):
         pass
 
 
 class BikerListAllView(GetAPIView):
+    permission_classes = [IsAuthenticated]
     class_serializer = BikerListSerializer
 
     def process(self, data):

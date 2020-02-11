@@ -19,11 +19,6 @@ class BikeRegisterSerializer(serializers.Serializer):
     facebook = serializers.CharField(max_length=100, required=False)
 
 
-class BikerLoginSerializer(serializers.Serializer):
-    email = serializers.CharField(max_length=100, required=True)
-    password = serializers.CharField(max_length=100, required=True)
-
-
 class BikerLogoutSerializer(serializers.Serializer):
     biker_id = serializers.IntegerField(required=True)
     token = serializers.CharField(required=True)

@@ -1,9 +1,5 @@
 import hashlib
 
-import jwt
-
-from vietnamracing import settings
-
 
 def generate_biker_response(biker):
     return {
@@ -29,8 +25,3 @@ def hash_password(password):
         (hashlib.sha256(salted_password.encode('utf-8')).hexdigest()).encode('utf-8')).hexdigest()
 
     return hashed_password
-
-
-def check_permission(biker_id, user_token):
-    payload_decode = jwt.decode(user_token, settings.SECRET_KEY)
-    return payload_decode["id"] == biker_id

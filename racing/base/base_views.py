@@ -46,10 +46,7 @@ class BaseView(APIView):
         raise self.__RespondJump
 
     def check_authen(self, request):
-        token = request.auth
-        payload_decode = jwt.decode(token, settings.SECRET_KEY)
-        if payload_decode["id"] == request.user.id:
-            self.response_json("error_permission_denied", {})
+        pass
 
 
 class GetAPIView(BaseView):
