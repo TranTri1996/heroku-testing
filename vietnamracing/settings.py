@@ -18,16 +18,14 @@ ALLOWED_HOSTS = ['localhost', 'morning-atoll-36458.herokuapp.com']
 # Application definition
 
 REST_FRAMEWORK = {
-  'DEFAULT_AUTHENTICATION_CLASSES': (
-    'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
-  ),
+  'DEFAULT_AUTHENTICATION_CLASSES': (),
 }
 
 JWT_AUTH = {
     'JWT_VERIFY': True,
     'JWT_VERIFY_EXPIRATION': True,
     'JWT_EXPIRATION_DELTA': datetime.timedelta(days=15),
-    'JWT_AUTH_HEADER_PREFIX': 'JWT',
+    'JWT_AUTH_HEADER_PREFIX': 'Bearer',
 }
 
 INSTALLED_APPS = [

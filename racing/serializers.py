@@ -37,7 +37,6 @@ class BikerListSerializer(serializers.Serializer):
 
 
 class BikerGetProfileSerializer(serializers.Serializer):
-    token = serializers.CharField(required=True)
     biker_id = serializers.IntegerField(required=True)
 
 

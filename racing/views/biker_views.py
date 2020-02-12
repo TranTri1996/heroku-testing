@@ -1,20 +1,18 @@
-import hashlib
+import datetime
 
 import jwt
-from rest_framework.permissions import AllowAny, IsAuthenticated
-from racing.base.base_views import GetAPIView, PostAPIView
+from racing.base.base_views import GetAPIView, PostAPIView, AuthenticatedAPView, PublicPostAPIView
 from racing.constants import BikerResponseMsg, Result
 from racing.mangers import biker_manager
 from racing.mangers.biker_manager import generate_biker_response
-from racing.models import Biker
+from racing.models import Biker, Token
 from racing.serializers import BikerLoginSerializer, BikerListSerializer, BikeRegisterSerializer, \
     BikerGetProfileSerializer, BikerLogoutSerializer
 from vietnamracing import settings
 from django.db.models import Q
 
 
-class BikerRegisterView(PostAPIView):
-    permission_classes = (AllowAny,)
+class BikerRegisterView(PublicPostAPIView):
     class_serializer = BikeRegisterSerializer
 
     def process(self, data):
@@ -68,26 +66,30 @@ class BikerRegisterView(PostAPIView):
             self.response_json(BikerResponseMsg.ERROR_PASSWORD_SHOULD_HAVE_AT_LEAST_ONE_SPECIAL_SYMBOL, {})
 
 
-class BikerLoginView(GetAPIView):
-    permission_classes = (AllowAny,)
+class BikerLoginView(PublicPostAPIView):
     class_serializer = BikerLoginSerializer
 
     def process(self, data):
         hashed_password = biker_manager.hash_password(data["password"])
         biker = Biker.objects.filter(email=data["email"], hashed_password=hashed_password).first()
-        if biker:
-            token = self.generate_token(biker)
-            biker_info = biker_manager.generate_biker_response(biker)
-            biker_info["token"] = token
-            return Result.SUCCESS, biker_info
+        try:
+            if biker:
+                token = self.generate_token(biker)
+                Token.objects.create(token=token,
+                                     biker_id=biker.id,
+                                     expiry_time=datetime.datetime.now(tz=datetime.timezone.utc))
 
-        return Result.ERROR_SERVER, {}
+                biker_info = biker_manager.generate_biker_response(biker)
+                biker_info["token"] = token
+
+                return Result.SUCCESS, biker_info
+
+        except Exception as e:
+            return Result.ERROR_SERVER, {"message {0}".format(e)}
 
     def generate_token(self, biker):
         payload = {
-            'id': biker.id,
-            'email': biker.email,
-            'username': biker.user_name
+            'id': biker.id
         }
         token = jwt.encode(payload, settings.SECRET_KEY)
 
@@ -106,8 +108,7 @@ class BikerLogoutView(PostAPIView):
             self.response_json(BikerResponseMsg.ERROR_PERMISSION_DENIED, {})
 
 
-class BikerGetProfileView(GetAPIView):
-    permission_classes = (AllowAny,)
+class BikerGetProfileView(AuthenticatedAPView):
     class_serializer = BikerGetProfileSerializer
 
     def process(self, data):
@@ -119,8 +120,7 @@ class BikerGetProfileView(GetAPIView):
         return Result.ERROR_SERVER, {}
 
     def validate_data(self, data):
-        if not biker_manager.check_permission(data["biker_id"], data["token"]):
-            self.response_json(BikerResponseMsg.ERROR_PERMISSION_DENIED, {})
+        pass
 
 
 class BikerListAllView(GetAPIView):
