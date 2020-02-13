@@ -1,13 +1,10 @@
-from racing.base.base_views import GetAPIView, PostAPIView
+from racing.base.base_views import PrivateGetAPIView, PrivatePostAPIView
 from racing.mangers.post_manager import generate_post_response
 from racing.constants import Result, PostResponseMsg
 from racing.models import Post, Biker
-from racing.serializers import PostListSerializer, PostCreateSerializer
 
 
-class PostListAllView(GetAPIView):
-    serializer_class = PostListSerializer
-
+class PostListAllView(PrivateGetAPIView):
     def process(self, data):
         posts = list(Post.objects.all())
         if data.get("biker_id"):
@@ -21,9 +18,7 @@ class PostListAllView(GetAPIView):
         return Result.SUCCESS, post_serializers
 
 
-class PostCreateView(PostAPIView):
-    class_serializer = PostCreateSerializer
-
+class PostCreateView(PrivatePostAPIView):
     def process(self, data):
         self.validate_data(data)
         post = Post.objects.create(biker_id=data["biker_id"],

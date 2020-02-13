@@ -57,16 +57,6 @@ class Biker(models.Model):
         db_table = "biker_tab"
 
 
-class Token(models.Model):
-    token = models.CharField(max_length=255, default="", primary_key=True)
-    biker_id = models.IntegerField()
-    expiry_time = models.DateTimeField()
-    app_type = models.SmallIntegerField(default=1)
-
-    class Meta:
-        db_table = 'token_tab'
-
-
 class Comment(models.Model):
     comment_parent_id = models.IntegerField(default=-1)  # default is have no parent
     biker_id = models.IntegerField(default=-1)

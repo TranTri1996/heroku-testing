@@ -1,121 +1,80 @@
+import jwt
 from rest_framework.views import APIView
 
-from racing import models
 from racing.base import encoders
-from racing.base.constant import AppType
 from racing.constants import Result
 from rest_framework.response import Response
 
-from racing.serializers import DumSerialize
+from vietnamracing import settings
 
 
-class BaseView(APIView):
-    class __RespondJump(Exception):
-        pass
+class BaseAPIVIew(APIView):
+    def __init__(self):
+        self.is_check_auth = None
+        self.serializer_class = None
 
-    def __init__(self, **kwargs):
-        super(APIView, self).__init__(**kwargs)
-        self._reply = None
+    def get(self, request):
+        if not self.serializer_class(data=request.query_params).is_valid():
+            self.response_json(Result.ERROR_PARAMS, {})
 
-    encoder_class = encoders.ExtendedJsonEncoder
+        return self.handle(request.META, request.query_params)
 
-    def get_serializer(self, *args, **kwargs):
-        if 'request' in kwargs:
-            request = kwargs.pop('request')
-            if request.method.lower() == 'post':
-                return self.class_serializer(data=request.data)
-            if request.method.lower() == 'get':
-                return self.class_serializer(data=request.query_params)
-        return self.class_serializer(*args, **kwargs)
+    def post(self, request):
+        if not self.serializer_class(data=request.data).is_valid():
+            self.response_json(Result.ERROR_PARAMS, {})
 
-    def handle(self, request, data, is_check_auth=False):
-        try:
-            self._app_type = 1 # request.META.get("RACING_APP_TYPE")
-            if is_check_auth:
-                self.check_authen(request)
+        return self.handle(request.META, request.data)
 
-            serializer = self.class_serializer(data=data)
-            if not serializer.is_valid():
-                self.response_json(Result.ERROR_PARAMS, serializer.errors)
-            result_code, reply = self.process(serializer.data)
-            self.response_json(result_code, reply)
+    def handle(self, request_meta, data):
+        if self.is_check_auth:
+            if not self.success_check_auth(request_meta):
+                return self.response_json(Result.ERROR_ACCESS_TOKEN, {})
 
-        except self.__RespondJump:
-            return self._reply
+            if not self.success_check_permission(request_meta):
+                return self.response_json(Result.ERROR_FORBIDDEN, {})
+
+        result_code, reply = self.process(data)
+
+        return self.response_json(result_code, reply)
+
+    def success_check_auth(self, request_meta):
+        jwt_access = request_meta.get("HTTP_AUTHORIZATION")
+        if not jwt_access:
+            return False
+
+        return True
+
+    def success_check_permission(self, request_meta):
+        jwt_header, token = request_meta["HTTP_AUTHORIZATION"].split(" ")
+
+        if jwt_header != settings.JWT_AUTH["JWT_AUTH_HEADER_PREFIX"]:
+            return False
+
+        decode_token = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
+        # if decode_token["biker_id"] != request_meta.get["HTTP_BIKER_ID"]:
+        #     return False
+
+        return True
 
     def response_json(self, result_code, reply=None):
-        self._reply = Response({"result": result_code, "reply": reply})
-        raise self.__RespondJump
-
-    def check_authen(self, request):
-        headers = request.META
-        token = headers.get("HTTP_AUTHORIZATION")
-        if not token:
-            self.response_json(Result.ERROR_FORBIDDEN, {})
-
-        app_type = 1# AppType[self._app_type].value
-        access_token = models.Token.objects.filter(token=token, app_type=app_type).first()
-        if not access_token:
-            self.response_json(Result.ERROR_ACCESS_TOKEN, {})
+        return Response({"result": result_code, "reply": reply})
 
 
-class GetAPIView(BaseView):
-    class_serializer = DumSerialize
-
-    def get(self, request):
-        return self.handle(request, request.query_params, False)
+class PublicGetAPIView(BaseAPIVIew):
+    def __init__(self):
+        self.is_check_auth = False
 
 
-class PostAPIView(BaseView):
-    class_serializer = DumSerialize
-
-    def post(self, request):
-        return self.handle(request, request.data, True)
+class PublicPostAPIView(BaseAPIVIew):
+    def __init__(self):
+        self.is_check_auth = False
 
 
-class AuthenticatedAPView(BaseView):
-    serializer_class = DumSerialize
-
-    def get(self, request):
-        self._app_type = request.META.get("RACING_APP_TYPE")
-        self.check_authen(request)
-
-        try:
-            serializer = self.serializer_class(data=request.query_params)
-            if not serializer.is_valid():
-                self.response_json(Result.ERROR_PARAMS, serializer.errors)
-
-            return self.process(serializer.data)
-        except self._BaseAPIView__RespondJump:
-            return self._reply
-
-    def post(self, request):
-        self._app_type = request.META.get("RACING_APP_TYPE")
-        self.check_authen(request)
-
-        try:
-            serializer = self.serializer_class(data=request.data)
-            if not serializer.is_valid():
-                self.respond_json(Result.ERROR_PARAMS, serializer.errors)
-
-            return self.process(serializer.data)
-        except self._BaseAPIView__RespondJump:
-            return self._reply
+class PrivateGetAPIView(BaseAPIVIew):
+    def __init__(self):
+        self.is_check_auth = True
 
 
-class PublicGetAPIView(BaseView):
-    serializer_class = DumSerialize
-
-    def get(self, request):
-        return self.handle(request, request.query_params, False)
-
-
-class PublicPostAPIView(BaseView):
-    serializer_class = DumSerialize
-
-    def post(self, request):
-        serializer = self.serializer_class(data=request.data)
-        if not serializer.is_valid():
-            self.respond_json(Result.ERROR_PARAMS, serializer.errors)
-
-        return self.handle(request, request.data, False)
+class PrivatePostAPIView(BaseAPIVIew):
+    def __init__(self):
+        self.is_check_auth = True
