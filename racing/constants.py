@@ -8,6 +8,8 @@ class Result(object):
     ERROR_SERVER = "error_server"
     ERROR_FORBIDDEN = "error_forbidden"
     ERROR_ACCESS_TOKEN = "error_access_token"
+    ERROR_TOKEN_EXPIRED = "error_token_expired"
+    ERROR_NOT_LOGIN_YET = "error_not_login_yet"
 
 
 class PostResponseMsg(object):

@@ -5,6 +5,9 @@ from racing.models import Post, Biker
 
 
 class PostListAllView(PrivateGetAPIView):
+    def __init__(self):
+        PrivateGetAPIView.__init__(self)
+
     def process(self, data):
         posts = list(Post.objects.all())
         if data.get("biker_id"):
@@ -19,6 +22,9 @@ class PostListAllView(PrivateGetAPIView):
 
 
 class PostCreateView(PrivatePostAPIView):
+    def __init__(self):
+        PrivatePostAPIView.__init__(self)
+
     def process(self, data):
         self.validate_data(data)
         post = Post.objects.create(biker_id=data["biker_id"],

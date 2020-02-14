@@ -7,7 +7,7 @@ class DumSerialize(serializers.Serializer):
 
 
 # BIKER SERIALIZER
-class BikeRegisterSerializer(serializers.Serializer):
+class RegisterSerializer(serializers.Serializer):
     full_name = serializers.CharField(max_length=50, required=False)
     user_name = serializers.CharField(max_length=50, required=True)
     phone = serializers.CharField(max_length=15, required=True)
@@ -19,14 +19,9 @@ class BikeRegisterSerializer(serializers.Serializer):
     facebook = serializers.CharField(max_length=100, required=False)
 
 
-class BikerLoginSerializer(serializers.Serializer):
+class LoginSerializer(serializers.Serializer):
     email = serializers.CharField(max_length=100, required=True)
     password = serializers.CharField(max_length=100, required=True)
-
-
-class BikerLogoutSerializer(serializers.Serializer):
-    biker_id = serializers.IntegerField(required=True)
-    token = serializers.CharField(required=True)
 
 
 class BikerListSerializer(serializers.Serializer):
@@ -34,10 +29,6 @@ class BikerListSerializer(serializers.Serializer):
     is_active = serializers.IntegerField(required=False)
     from_time = serializers.DateTimeField(required=False)
     to_time = serializers.DateTimeField(required=False)
-
-
-class BikerGetProfileSerializer(serializers.Serializer):
-    biker_id = serializers.IntegerField(required=True)
 
 
 # POST SERIALIZER
