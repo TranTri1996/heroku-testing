@@ -73,22 +73,19 @@ class LoginView(PublicPostAPIView):
     def process(self, data):
         hashed_password = biker_manager.hash_password(data["password"])
         biker = Biker.objects.filter(email=data["email"], hashed_password=hashed_password).first()
-        try:
-            if biker:
-                access_token = self.generate_access_token(biker)
-                biker_info = biker_manager.generate_biker_response(biker)
-                biker_info["access_token"] = access_token
-                self.set_user_id(biker.id)
 
-                return Result.SUCCESS, biker_info
+        if biker:
+            access_token = self.generate_access_token(biker)
+            biker_info = biker_manager.generate_biker_response(biker)
+            biker_info["access_token"] = access_token
+            self.set_user_id(biker.id)
 
-        except Exception:
-            return Result.ERROR_SERVER, {}
+            return Result.SUCCESS, biker_info
 
     def generate_access_token(self, biker):
         payload = {
             'user_id': biker.id,
-            'expired_time': datetime.datetime.now() + settings.JWT_AUTH["JWT_EXPIRATION_DELTA"]
+            'expired_time': str(datetime.datetime.now() + settings.JWT_AUTH["JWT_EXPIRATION_DELTA"])
         }
 
         access_token = jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.JWT_AUTH["ENCRYPT_ALGORITHM"])

@@ -24,6 +24,10 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField(max_length=100, required=True)
 
 
+class BikerGetProfileSerializer(serializers.Serializer):
+    biker_id = serializers.IntegerField(required=False)
+
+
 class BikerListSerializer(serializers.Serializer):
     biker_id = serializers.IntegerField(required=False)
     is_active = serializers.IntegerField(required=False)
