@@ -37,3 +37,7 @@ class PostCreateSerializer(serializers.Serializer):
     title = serializers.CharField(max_length=255, required=False, default="")
     description = serializers.CharField(max_length=5000, required=False, default="")
     is_active = serializers.IntegerField(required=False, default=1)
+
+
+class ForgotPasswordSerializer(serializers.Serializer):
+    email = serializers.CharField(max_length=100, required=True)

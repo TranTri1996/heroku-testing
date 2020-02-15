@@ -2,13 +2,12 @@ import datetime
 
 import jwt
 from django.db.models import Q
-
 from racing.base.base_views import PublicPostAPIView, PrivatePostAPIView
-from racing.constants import Result, BikerResponseMsg
+from racing.constants import Result
 from racing.mangers import biker_manager
 from racing.mangers.biker_manager import generate_biker_response
 from racing.models import Biker
-from racing.serializers import RegisterSerializer, LoginSerializer
+from racing.serializers import RegisterSerializer, LoginSerializer, ForgotPasswordSerializer
 from vietnamracing import settings
 
 
@@ -36,9 +35,9 @@ class RegisterView(PublicPostAPIView):
         biker = Biker.objects.filter(Q(email=data["email"]) | Q(phone=data["phone"])).first()
         if biker:
             if biker.email == data["email"]:
-                self.response_json(BikerResponseMsg.ERROR_EMAIL_EXISTED, {})
+                return Result.ERROR_EMAIL_EXISTED
             if biker.phone == data["phone"]:
-                self.response_json(BikerResponseMsg.ERROR_PHONE_EXISTED, {})
+                return Result.ERROR_PHONE_EXISTED
 
         self.verify_password(data["password"])
 
@@ -52,17 +51,17 @@ class RegisterView(PublicPostAPIView):
             if it has at least one numeral
             if it has any of the required special symbols
             """
-        sym = ['$', '@', '#', '$', '&', '^', '*', '!', ',', '?', '.', '{', '}', '(', ')', '~', ';', ':', '/', '|', '\\']
+        sym = ['@', '#', '$', '&', '^', '*', '!', ',', '?', '.', '{', '}', '(', ')', '~', ';', ':', '/', '|', '\\']
         if len(password) < 6:
-            self.response_json(BikerResponseMsg.ERROR_PASSWORD_LENGTH_IS_SMALLER_THAN_6, {})
+            return Result.ERROR_PASSWORD_LENGTH_IS_SMALLER_THAN_6
         if not any(char.isdigit() for char in password):
-            self.response_json(BikerResponseMsg.ERROR_PASSWORD_SHOULD_HAVE_AT_LEAST_ONE_NUMERAL, {})
+            return Result.ERROR_PASSWORD_SHOULD_HAVE_AT_LEAST_ONE_NUMERAL
         if not any(char.isupper() for char in password):
-            self.response_json(BikerResponseMsg.ERROR_PASSWORD_SHOULD_HAVE_AT_LEAST_ONE_UPPER_CASE, {})
+            return Result.ERROR_PASSWORD_SHOULD_HAVE_AT_LEAST_ONE_UPPER_CASE
         if not any(char.islower() for char in password):
-            self.response_json(BikerResponseMsg.ERROR_PASSWORD_SHOULD_HAVE_AT_LEAST_ONE_LOWER_CASE, {})
+            return Result.ERROR_PASSWORD_SHOULD_HAVE_AT_LEAST_ONE_LOWER_CASE
         if not any(char in sym for char in password):
-            self.response_json(BikerResponseMsg.ERROR_PASSWORD_SHOULD_HAVE_AT_LEAST_ONE_SPECIAL_SYMBOL, {})
+            return Result.ERROR_PASSWORD_SHOULD_HAVE_AT_LEAST_ONE_SPECIAL_SYMBOL
 
 
 class LoginView(PublicPostAPIView):
@@ -71,8 +70,14 @@ class LoginView(PublicPostAPIView):
         self.serializer_class = LoginSerializer
 
     def process(self, data):
+        biker = Biker.objects.filter(email=data["email"]).first()
+
+        if not biker:
+            return Result.EMAIL_NOT_EXISTED, None
+
         hashed_password = biker_manager.hash_password(data["password"])
-        biker = Biker.objects.filter(email=data["email"], hashed_password=hashed_password).first()
+        if biker.hashed_password != hashed_password:
+            return Result.ERROR_WRONG_PASSWORD, None
 
         if biker:
             access_token = self.generate_access_token(biker)
@@ -92,10 +97,17 @@ class LoginView(PublicPostAPIView):
         return access_token
 
 
+class ForgotPasswordView(PublicPostAPIView):
+    def __init__(self):
+        PublicPostAPIView.__init__(self)
+
+    def process(self):
+        pass
+
+
 class LogoutView(PrivatePostAPIView):
     def __init__(self):
         PrivatePostAPIView.__init__(self)
 
     def process(self, data):
-
         return Result.SUCCESS, {}

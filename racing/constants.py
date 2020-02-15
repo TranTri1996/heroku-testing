@@ -10,14 +10,10 @@ class Result(object):
     ERROR_ACCESS_TOKEN = "error_access_token"
     ERROR_TOKEN_EXPIRED = "error_token_expired"
     ERROR_NOT_LOGIN_YET = "error_not_login_yet"
-
-
-class PostResponseMsg(object):
+    EMAIL_NOT_EXISTED = "error_email_not_existed"
+    ERROR_WRONG_PASSWORD = "error_wrong_password"
     ERROR_REQUIRED_BIKER_ID = "error_required_biker_id"
     ERROR_BIKER_IS_NOT_EXISTED = "error_biker_is_not_existed"
-
-
-class BikerResponseMsg(object):
     ERROR_REQUIRED_PASSWORD = "error_required_password"
     ERROR_REQUIRED_FULL_NAME = "error_required_full_name"
     ERROR_REQUIRED_USER_NAME = "error_required_user_name"

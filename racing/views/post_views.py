@@ -1,6 +1,6 @@
 from racing.base.base_views import PrivateGetAPIView, PrivatePostAPIView
 from racing.mangers.post_manager import generate_post_response
-from racing.constants import Result, PostResponseMsg
+from racing.constants import Result
 from racing.models import Post, Biker
 
 
@@ -36,9 +36,9 @@ class PostCreateView(PrivatePostAPIView):
 
     def validate_data(self, data):
         if not data.get("biker_id"):
-            self.response_json(PostResponseMsg.ERROR_REQUIRED_BIKER_ID, {})
+            self.response_json(Result.ERROR_REQUIRED_BIKER_ID, {})
         if not self.is_biker_existed(data["biker_id"]):
-            self.response_json(PostResponseMsg.ERROR_BIKER_IS_NOT_EXISTED, {})
+            self.response_json(Result.ERROR_BIKER_IS_NOT_EXISTED, {})
 
     def is_biker_existed(self, biker_id):
         biker = Biker.objects.filter(id=biker_id).first()

@@ -19,12 +19,13 @@ class BaseAPIVIew(APIView):
                 return self.handle(request.META, request.query_params)
 
             if not self.serializer_class(data=request.query_params).is_valid():
-                return self.response_json(Result.ERROR_PARAMS, {})
+                return self.response_json(Result.ERROR_PARAMS)
 
             return self.handle(request.META, request.query_params)
 
-        except Exception:
-            return self.response_json(Result.ERROR_SERVER, {})
+        except Exception as e:
+            print(str(e))
+            return self.response_json(Result.ERROR_SERVER)
 
     def post(self, request):
         try:
@@ -32,12 +33,13 @@ class BaseAPIVIew(APIView):
                 return self.handle(request.META, request.data)
 
             if not self.serializer_class(data=request.data).is_valid():
-                return self.response_json(Result.ERROR_PARAMS, {})
+                return self.response_json(Result.ERROR_PARAMS)
 
             return self.handle(request.META, request.data)
 
-        except Exception:
-            return self.response_json(Result.ERROR_SERVER, {})
+        except Exception as e:
+            print(str(e))
+            return self.response_json(Result.ERROR_SERVER)
 
     def handle(self, request_meta, data):
         if self.is_check_auth:
@@ -52,21 +54,22 @@ class BaseAPIVIew(APIView):
         try:
             jwt_prefix, jwt_token = request_meta["HTTP_AUTHORIZATION"].split(" ")
             if not jwt_prefix or not jwt_token:
-                return self.response_json(Result.ERROR_ACCESS_TOKEN, {})
+                return self.response_json(Result.ERROR_ACCESS_TOKEN)
 
             if jwt_prefix != settings.JWT_AUTH["JWT_AUTH_HEADER_PREFIX"]:
-                return self.response_json(Result.ERROR_ACCESS_TOKEN, {})
+                return self.response_json(Result.ERROR_ACCESS_TOKEN)
 
             decoded_token = jwt.decode(jwt_token, settings.SECRET_KEY,
                                        algorithms=settings.JWT_AUTH["ENCRYPT_ALGORITHM"])
             expired_time = datetime.datetime.strptime(decoded_token["expired_time"], '%Y-%m-%d %H:%M:%S.%f')
             if expired_time < datetime.datetime.now():
-                return self.response_json(Result.ERROR_TOKEN_EXPIRED, {})
+                return self.response_json(Result.ERROR_TOKEN_EXPIRED)
 
             self.set_user_id(decoded_token["user_id"])
 
-        except Exception:
-            return self.response_json(Result.ERROR_SERVER, {})
+        except Exception as e:
+            print(str(e))
+            return self.response_json(Result.ERROR_SERVER)
 
     def set_user_id(self, user_id=None):
         self.user_id = user_id
