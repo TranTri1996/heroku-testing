@@ -1,11 +1,6 @@
 from rest_framework import serializers
 
 
-# BASE SERIALIZER
-class DumSerialize(serializers.Serializer):
-    pass
-
-
 # BIKER SERIALIZER
 class RegisterSerializer(serializers.Serializer):
     full_name = serializers.CharField(max_length=50, required=False)
@@ -22,10 +17,6 @@ class RegisterSerializer(serializers.Serializer):
 class LoginSerializer(serializers.Serializer):
     email = serializers.CharField(max_length=100, required=True)
     password = serializers.CharField(max_length=100, required=True)
-
-
-class BikerGetProfileSerializer(serializers.Serializer):
-    biker_id = serializers.IntegerField(required=False)
 
 
 class BikerListSerializer(serializers.Serializer):

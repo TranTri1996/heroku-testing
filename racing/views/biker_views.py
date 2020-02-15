@@ -2,13 +2,11 @@ from racing.base.base_views import PrivateGetAPIView
 from racing.constants import Result
 from racing.mangers import biker_manager
 from racing.models import Biker
-from racing.serializers import BikerGetProfileSerializer
 
 
 class BikerGetProfileView(PrivateGetAPIView):
     def __init__(self):
         PrivateGetAPIView.__init__(self)
-        self.serializer_class = BikerGetProfileSerializer
 
     def process(self, data):
         self.validate_data(data)

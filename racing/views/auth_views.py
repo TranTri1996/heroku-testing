@@ -78,7 +78,6 @@ class LoginView(PublicPostAPIView):
             access_token = self.generate_access_token(biker)
             biker_info = biker_manager.generate_biker_response(biker)
             biker_info["access_token"] = access_token
-            self.set_user_id(biker.id)
 
             return Result.SUCCESS, biker_info
 
@@ -98,6 +97,5 @@ class LogoutView(PrivatePostAPIView):
         PrivatePostAPIView.__init__(self)
 
     def process(self, data):
-        self.set_user_id(None)
 
         return Result.SUCCESS, {}
