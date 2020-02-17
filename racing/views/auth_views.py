@@ -1,13 +1,15 @@
 import datetime
-
+import string
+import random
 import jwt
 from django.db.models import Q
 from racing.base.base_views import PublicPostAPIView, PrivatePostAPIView
 from racing.constants import Result
-from racing.mangers import biker_manager
+from racing.mangers import biker_manager, auth_manager
 from racing.mangers.biker_manager import generate_biker_response
 from racing.models import Biker
-from racing.serializers import RegisterSerializer, LoginSerializer, ForgotPasswordSerializer
+from racing.serializers import RegisterSerializer, LoginSerializer, ForgotPasswordSerializer, ChangePasswordSerializer
+from racing.utils import email_utils
 from vietnamracing import settings
 
 
@@ -51,7 +53,7 @@ class RegisterView(PublicPostAPIView):
             if it has at least one numeral
             if it has any of the required special symbols
             """
-        sym = ['@', '#', '$', '&', '^', '*', '!', ',', '?', '.', '{', '}', '(', ')', '~', ';', ':', '/', '|', '\\']
+        sym = list(string.punctuation)
         if len(password) < 6:
             return Result.ERROR_PASSWORD_LENGTH_IS_SMALLER_THAN_6
         if not any(char.isdigit() for char in password):
@@ -75,7 +77,7 @@ class LoginView(PublicPostAPIView):
         if not biker:
             return Result.EMAIL_NOT_EXISTED, None
 
-        hashed_password = biker_manager.hash_password(data["password"])
+        hashed_password = auth_manager.hash_password(data["password"])
         if biker.hashed_password != hashed_password:
             return Result.ERROR_WRONG_PASSWORD, None
 
@@ -100,9 +102,52 @@ class LoginView(PublicPostAPIView):
 class ForgotPasswordView(PublicPostAPIView):
     def __init__(self):
         PublicPostAPIView.__init__(self)
+        self.serializer_class = ForgotPasswordSerializer
 
-    def process(self):
-        pass
+    def process(self, data):
+        try:
+            user = Biker.objects.filter(email=data["email"]).first()
+
+            if user:
+                new_password = self.generate_password(8)
+                email_utils.send_email("Forgot password", "New password: {0}".format(new_password), user.email)
+
+                return Result.SUCCESS, None
+
+            return Result.ERROR_USER_IS_NOT_FOUND, None
+
+        except Exception as e:
+            print(str(e))
+            return Result.ERROR_SERVER, str(e)
+
+    def generate_password(self, pass_len=8):
+        chars = string.ascii_letters + string.digits + string.punctuation
+
+        return ''.join(random.choice(chars) for _ in range(pass_len))
+
+
+class ChangePasswordView(PrivatePostAPIView):
+    def __init__(self):
+        PrivatePostAPIView.__init__(self)
+        self.serializer_class = ChangePasswordSerializer
+
+    def process(self, data):
+        try:
+            if data["new_password"] != data["repeat_new_password"]:
+                return Result.ERROR_NEW_PASSWORD_NOT_EQUAL_REPEAT_NEW_PASSWORD, None
+
+            hashing_current_password = auth_manager.hash_password(data["current_password"])
+            user = Biker.objects.filter(hash_password=hashing_current_password).first()
+            if not user:
+                return Result.ERROR_WRONG_PASSWORD, None
+
+            hashing_new_password = auth_manager.hash_password(data["new_password"])
+            Biker.objects.filter(hashed_password=hashing_current_password).update(hash_password=hashing_new_password)
+
+            return Result.SUCCESS, None
+        except Exception as e:
+            print(str(e))
+            return Result.ERROR_SERVER, str(e)
 
 
 class LogoutView(PrivatePostAPIView):
