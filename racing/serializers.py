@@ -41,3 +41,9 @@ class PostCreateSerializer(serializers.Serializer):
 
 class ForgotPasswordSerializer(serializers.Serializer):
     email = serializers.CharField(max_length=100, required=True)
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    current_password = serializers.CharField(max_length=100, required=True)
+    new_password = serializers.CharField(max_length=100, required=True)
+    repeat_new_password = serializers.CharField(max_length=100, required=True)

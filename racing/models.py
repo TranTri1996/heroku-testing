@@ -41,7 +41,7 @@ class Biker(models.Model):
     user_name = models.CharField(max_length=50, null=False)
     phone = models.CharField(max_length=15, unique=True)
     email = models.CharField(max_length=100, unique=True)
-    hashed_password = models.CharField(max_length=100, null=False, default="")
+    hashed_password = models.CharField(max_length=255, null=False, default="")
     password_salt = models.CharField(max_length=128, default="")
     is_active = models.BooleanField(default=1)
     main_address_id = models.IntegerField(null=True, default=-1)
