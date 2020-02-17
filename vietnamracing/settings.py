@@ -78,8 +78,8 @@ DATABASES = {
         'NAME': 'vietnam_racing',
         'USER': 'root',
         'PASSWORD': 'root',
-        'HOST': 'localhost',  # Or an IP Address that your DB is hosted on
-        'PORT': '3306',
+        'HOST': 'db',
+        'PORT': 3306,
     }
 }
 
