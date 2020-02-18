@@ -1,4 +1,6 @@
 import datetime
+import types
+
 import jwt
 
 from rest_framework.views import APIView
@@ -9,8 +11,6 @@ from vietnamracing import settings
 
 class BaseAPIVIew(APIView):
     def __init__(self, **kwargs):
-        self.is_check_auth = None
-        self.user_id = None
         self.serializer_class = None
 
     def get(self, request):
@@ -65,14 +65,11 @@ class BaseAPIVIew(APIView):
             if expired_time < datetime.datetime.now():
                 return self.response_json(Result.ERROR_TOKEN_EXPIRED)
 
-            self.set_user_id(decoded_token["user_id"])
+            self.user_id = decoded_token["user_id"]
 
         except Exception as e:
             print(str(e))
             return self.response_json(Result.ERROR_SERVER)
-
-    def set_user_id(self, user_id=None):
-        self.user_id = user_id
 
     def check_permission(self, request_meta):
         pass

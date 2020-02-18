@@ -19,7 +19,8 @@ class RegisterView(PublicPostAPIView):
         self.serializer_class = RegisterSerializer
 
     def process(self, data):
-        self.validate_data(data)
+        error = self.validate_data(data)
+        if error: return error, None
         hashed_password = auth_manager.hash_password(data["password"])
         biker = Biker.objects.create(full_name=data["full_name"],
                                      user_name=data["user_name"],
@@ -41,7 +42,8 @@ class RegisterView(PublicPostAPIView):
             if biker.phone == data["phone"]:
                 return Result.ERROR_PHONE_EXISTED
 
-        self.verify_password(data["password"])
+        error = self.verify_password(data["password"])
+        if error: return error
 
     def verify_password(self, password):
         """Check if the password is valid.
@@ -139,7 +141,6 @@ class ChangePasswordView(PrivatePostAPIView):
                 return Result.ERROR_NEW_PASSWORD_NOT_EQUAL_REPEAT_NEW_PASSWORD, None
 
             hashed_current_password = auth_manager.hash_password(data["current_password"])
-            sdf = Biker.objects.filter(email="trith@vng.com.vn").first()
             user = Biker.objects.filter(hashed_password=hashed_current_password).first()
             if not user:
                 return Result.ERROR_WRONG_PASSWORD, None
