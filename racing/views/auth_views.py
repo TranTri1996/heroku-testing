@@ -128,9 +128,9 @@ class ForgotPasswordView(PublicGetAPIView):
         return ''.join(random.choice(chars) for _ in range(pass_len))
 
 
-class ChangePasswordView(PublicPostAPIView):
+class ChangePasswordView(PrivatePostAPIView):
     def __init__(self):
-        PublicPostAPIView.__init__(self)
+        PrivatePostAPIView.__init__(self)
         self.serializer_class = ChangePasswordSerializer
 
     def process(self, data):
