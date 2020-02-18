@@ -10,8 +10,8 @@ from vietnamracing import settings
 
 
 class BaseAPIVIew(APIView):
-    def __init__(self, **kwargs):
-        self.serializer_class = None
+    serializer_class = None
+    is_check_auth = False
 
     def get(self, request):
         try:
@@ -43,33 +43,39 @@ class BaseAPIVIew(APIView):
 
     def handle(self, request_meta, data):
         if self.is_check_auth:
-            self.check_auth(request_meta)
+            error_auth = self.check_auth(request_meta)
+            if error_auth:
+                return self.response_json(error_auth, None)
             self.check_permission(request_meta)
-
         result_code, reply = self.process(data)
 
         return self.response_json(result_code, reply)
 
     def check_auth(self, request_meta):
         try:
+            if not request_meta.get("HTTP_AUTHORIZATION"):
+                return Result.ERROR_ACCESS_TOKEN
+
             jwt_prefix, jwt_token = request_meta["HTTP_AUTHORIZATION"].split(" ")
             if not jwt_prefix or not jwt_token:
-                return self.response_json(Result.ERROR_ACCESS_TOKEN)
+                return Result.ERROR_ACCESS_TOKEN
 
             if jwt_prefix != settings.JWT_AUTH["JWT_AUTH_HEADER_PREFIX"]:
-                return self.response_json(Result.ERROR_ACCESS_TOKEN)
+                return Result.ERROR_ACCESS_TOKEN
 
             decoded_token = jwt.decode(jwt_token, settings.SECRET_KEY,
                                        algorithms=settings.JWT_AUTH["ENCRYPT_ALGORITHM"])
             expired_time = datetime.datetime.strptime(decoded_token["expired_time"], '%Y-%m-%d %H:%M:%S.%f')
             if expired_time < datetime.datetime.now():
-                return self.response_json(Result.ERROR_TOKEN_EXPIRED)
+                return Result.ERROR_TOKEN_EXPIRED
 
             self.user_id = decoded_token["user_id"]
 
+            return None
+
         except Exception as e:
             print(str(e))
-            return self.response_json(Result.ERROR_SERVER)
+            return Result.ERROR_SERVER
 
     def check_permission(self, request_meta):
         pass
@@ -79,23 +85,16 @@ class BaseAPIVIew(APIView):
 
 
 class PublicGetAPIView(BaseAPIVIew):
-    def __init__(self):
-        self.is_check_auth = False
+    is_check_auth = False
 
 
 class PublicPostAPIView(BaseAPIVIew):
-    def __init__(self):
-        self.serializer_class = None
-        self.is_check_auth = False
+    is_check_auth = False
 
 
 class PrivateGetAPIView(BaseAPIVIew):
-    def __init__(self):
-        self.serializer_class = None
-        self.is_check_auth = True
+    is_check_auth = True
 
 
 class PrivatePostAPIView(BaseAPIVIew):
-    def __init__(self):
-        self.serializer_class = None
-        self.is_check_auth = True
+    is_check_auth = True

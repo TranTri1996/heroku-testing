@@ -14,13 +14,13 @@ from vietnamracing import settings
 
 
 class RegisterView(PublicPostAPIView):
-    def __init__(self):
-        PublicPostAPIView.__init__(self)
-        self.serializer_class = RegisterSerializer
+    serializer_class = RegisterSerializer
 
     def process(self, data):
         error = self.validate_data(data)
-        if error: return error, None
+        if error:
+            return error, None
+
         hashed_password = auth_manager.hash_password(data["password"])
         biker = Biker.objects.create(full_name=data["full_name"],
                                      user_name=data["user_name"],
@@ -69,9 +69,7 @@ class RegisterView(PublicPostAPIView):
 
 
 class LoginView(PublicPostAPIView):
-    def __init__(self):
-        PublicPostAPIView.__init__(self)
-        self.serializer_class = LoginSerializer
+    serializer_class = LoginSerializer
 
     def process(self, data):
         biker = Biker.objects.filter(email=data["email"]).first()
@@ -102,9 +100,7 @@ class LoginView(PublicPostAPIView):
 
 
 class ForgotPasswordView(PublicGetAPIView):
-    def __init__(self):
-        PublicGetAPIView.__init__(self)
-        self.serializer_class = ForgotPasswordSerializer
+    serializer_class = ForgotPasswordSerializer
 
     def process(self, data):
         try:
@@ -131,9 +127,7 @@ class ForgotPasswordView(PublicGetAPIView):
 
 
 class ChangePasswordView(PrivatePostAPIView):
-    def __init__(self):
-        PrivatePostAPIView.__init__(self)
-        self.serializer_class = ChangePasswordSerializer
+    serializer_class = ChangePasswordSerializer
 
     def process(self, data):
         try:
@@ -156,8 +150,6 @@ class ChangePasswordView(PrivatePostAPIView):
 
 
 class LogoutView(PrivatePostAPIView):
-    def __init__(self):
-        PrivatePostAPIView.__init__(self)
 
     def process(self, data):
         return Result.SUCCESS, {}
