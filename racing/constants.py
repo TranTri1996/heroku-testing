@@ -8,6 +8,7 @@ class Result(object):
     ERROR_SERVER = "error_server"
     ERROR_FORBIDDEN = "error_forbidden"
     ERROR_ACCESS_TOKEN = "error_access_token"
+    ERROR_CANNOT_DECODE_ACCESS_TOKEN = "error_cannot_decode_access_token"
     ERROR_TOKEN_EXPIRED = "error_token_expired"
     ERROR_EMAIL_NOT_EXISTED = "error_email_not_existed"
     ERROR_WRONG_PASSWORD = "error_wrong_password"

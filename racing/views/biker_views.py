@@ -12,6 +12,8 @@ class BikerGetProfileView(PrivateGetAPIView):
             if biker:
                 return Result.SUCCESS, biker_manager.generate_biker_response(biker)
 
+            return Result.ERROR_USER_IS_NOT_FOUND, {}
+
         except Exception as e:
             print(str(e))
             return Result.ERROR_SERVER, str(e)

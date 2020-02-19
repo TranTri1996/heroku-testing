@@ -42,43 +42,40 @@ class BaseAPIVIew(APIView):
             return self.response_json(Result.ERROR_SERVER)
 
     def handle(self, request_meta, data):
-        if self.is_check_auth:
-            error_auth = self.check_auth(request_meta)
-            if error_auth:
-                return self.response_json(error_auth, None)
-            self.check_permission(request_meta)
-        result_code, reply = self.process(data)
-
-        return self.response_json(result_code, reply)
-
-    def check_auth(self, request_meta):
         try:
-            if not request_meta.get("HTTP_AUTHORIZATION"):
-                return Result.ERROR_ACCESS_TOKEN
+            if self.is_check_auth:
+                error_auth = self.check_auth(request_meta)
+                if error_auth:
+                    return self.response_json(error_auth, None)
 
-            jwt_prefix, jwt_token = request_meta["HTTP_AUTHORIZATION"].split(" ")
-            if not jwt_prefix or not jwt_token:
-                return Result.ERROR_ACCESS_TOKEN
+            result_code, reply = self.process(data)
 
-            if jwt_prefix != settings.JWT_AUTH["JWT_AUTH_HEADER_PREFIX"]:
-                return Result.ERROR_ACCESS_TOKEN
-
-            decoded_token = jwt.decode(jwt_token, settings.SECRET_KEY,
-                                       algorithms=settings.JWT_AUTH["ENCRYPT_ALGORITHM"])
-            expired_time = datetime.datetime.strptime(decoded_token["expired_time"], '%Y-%m-%d %H:%M:%S.%f')
-            if expired_time < datetime.datetime.now():
-                return Result.ERROR_TOKEN_EXPIRED
-
-            self.user_id = decoded_token["user_id"]
-
-            return None
-
+            return self.response_json(result_code, reply)
         except Exception as e:
             print(str(e))
-            return Result.ERROR_SERVER
+            return self.response_json(Result.ERROR_SERVER, str(e))
 
-    def check_permission(self, request_meta):
-        pass
+    def check_auth(self, request_meta):
+        if not request_meta.get("HTTP_AUTHORIZATION") or len(request_meta["HTTP_AUTHORIZATION"].split(" ")) != 2:
+            return Result.ERROR_ACCESS_TOKEN
+
+        jwt_prefix, jwt_token = request_meta["HTTP_AUTHORIZATION"].split(" ")
+        if jwt_prefix != settings.JWT_AUTH["JWT_AUTH_HEADER_PREFIX"]:
+            return Result.ERROR_ACCESS_TOKEN
+        try:
+            decoded_token = jwt.decode(jwt_token, settings.SECRET_KEY,
+                                       algorithms=settings.JWT_AUTH["ENCRYPT_ALGORITHM"])
+        except Exception as e:
+            print(str(e))
+            return Result.ERROR_CANNOT_DECODE_ACCESS_TOKEN
+
+        expired_time = datetime.datetime.strptime(decoded_token["expired_time"], '%Y-%m-%d %H:%M:%S.%f')
+        if expired_time < datetime.datetime.now():
+            return Result.ERROR_TOKEN_EXPIRED
+
+        self.user_id = decoded_token["user_id"]
+
+        return None
 
     def response_json(self, result_code, reply=None):
         return Response({"result": result_code, "reply": reply})
