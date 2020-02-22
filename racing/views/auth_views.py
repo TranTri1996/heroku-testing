@@ -22,15 +22,16 @@ class RegisterView(PublicPostAPIView):
             return error, None
 
         hashed_password = auth_manager.hash_password(data["password"])
-        biker = Biker.objects.create(full_name=data["full_name"],
-                                     user_name=data["user_name"],
-                                     phone=data["phone"],
-                                     email=data["email"],
-                                     hashed_password=hashed_password,
-                                     job=data.get("job", ""),
-                                     gender=data.get("gender", 1),
-                                     facebook=data.get("facebook", "")
-                                     )
+        biker = Biker.objects.create(
+            full_name=data["full_name"],
+            user_name=data["user_name"],
+            phone=data["phone"],
+            email=data["email"],
+            hashed_password=hashed_password,
+            job=data.get("job", ""),
+            gender=data.get("gender", 1),
+            facebook=data.get("facebook", "")
+        )
 
         return Result.SUCCESS, generate_biker_response(biker)
 
@@ -121,7 +122,7 @@ class ForgotPasswordView(PublicGetAPIView):
             return Result.ERROR_SERVER, str(e)
 
     def generate_password(self, pass_len=8):
-        chars = string.ascii_letters + string.digits + string.punctuation
+        chars = string.ascii_letters + string.digits + string.digits + string.punctuation
 
         return ''.join(random.choice(chars) for _ in range(pass_len))
 

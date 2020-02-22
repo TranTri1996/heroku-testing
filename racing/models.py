@@ -1,20 +1,34 @@
 from __future__ import unicode_literals
 from django.db import models
 
-
 class Accessory(models.Model):
-    biker_id = models.IntegerField(default=-1)
+    name = models.CharField(max_length=255, null=False)
+
+class Product(models.Model):
+    user_id = models.IntegerField(default=-1)
     name = models.CharField(max_length=100, null=False, default="")
     description = models.TextField(null=True, default="")
-    unit_price = models.DecimalField(decimal_places=2, max_digits=20, default=0.0)
-    market_price = models.DecimalField(decimal_places=2, max_digits=20, default=0.0)
-    like_number = models.IntegerField(null=False, default=0)
+    price = models.DecimalField(decimal_places=2, max_digits=20, default=0.0)
+    sale_status = models.SmallIntegerField(default=0)
     is_active = models.SmallIntegerField(default=0)
+    accessory_id = models.SmallIntegerField()
     created_time = models.DateTimeField(auto_now_add=True, blank=True)
     updated_time = models.DateTimeField(auto_now_add=True, blank=True)
 
     class Meta:
-        db_table = "accessory_tab"
+        db_table = "product_tab"
+
+
+class ProductImage(models.Model):
+    product_id = models.IntegerField(default=-1)
+    url = models.CharField(max_length=255, null=False)
+
+    class Meta:
+        db_table = "product_image_tab"
+
+
+class Province(models.Model):
+    name = models.CharField(max_length=255, null=False)
 
 
 class BikerAddress(models.Model):

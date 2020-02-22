@@ -28,3 +28,7 @@ class Result(object):
 class Gender(enum.Enum):
     MALE = 1,
     FEMALE = 2
+
+class SaleStatus(enum.Enum):
+    SALE_NOT_YET = 0
+    SALE_ALREADY = 1
