@@ -17,11 +17,16 @@ def generate_product_response(product):
 
 def fill_accessory_info(product_response_list):
     accessory_ids = list(res["accessory_id"] for res in product_response_list)
-    accessories = list(Accessory.objects.filter(id__in=accessory_ids))
-    accessory_map = {acc.id: acc for acc in accessories}
+    accessories = Accessory.objects.filter(id__in=accessory_ids)
 
+    accessory_map = {acc.id: acc for acc in accessories}
     for p in product_response_list:
-        p["accessory_name"] = accessory_map[p["id"]].name
+        if accessory_map.get(p["accessory_id"]):
+            p["accessory_name"] = accessory_map[p["accessory_id"]].name
+        else:
+            p["accessory_name"] = ""
+
+    return product_response_list
 
 
 def fill_image_info(product_response_list):
@@ -40,3 +45,5 @@ def fill_image_info(product_response_list):
 
     for res in product_response_list:
         res["urls"] = product_image_map.get(res["id"], [])
+
+    return product_response_list

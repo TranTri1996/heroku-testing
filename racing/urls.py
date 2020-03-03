@@ -1,6 +1,6 @@
 from rest_framework import routers
 from django.conf.urls import url
-from racing.views import biker_views, post_views, auth_views
+from racing.views import biker_views, auth_views, product_views
 
 router = routers.DefaultRouter()
 
@@ -13,6 +13,6 @@ urlpatterns = [
 
     url('^biker/profile$', biker_views.BikerGetProfileView.as_view()),
 
-    url('^post/list$', post_views.PostListAllView.as_view()),
-    url('^post/create$', post_views.PostCreateView.as_view()),
+    url('^product/create$', product_views.CreateProductView.as_view()),
+    url('^product/list$', product_views.GetPersonalProductListView.as_view())
 ]

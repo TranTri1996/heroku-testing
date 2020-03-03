@@ -1,8 +1,13 @@
 from __future__ import unicode_literals
 from django.db import models
 
+
 class Accessory(models.Model):
     name = models.CharField(max_length=255, null=False)
+
+    class Meta:
+        db_table = "accessory_tab"
+
 
 class Product(models.Model):
     user_id = models.IntegerField(default=-1)
@@ -29,6 +34,9 @@ class ProductImage(models.Model):
 
 class Province(models.Model):
     name = models.CharField(max_length=255, null=False)
+
+    class Meta:
+        db_table = "province_tab"
 
 
 class BikerAddress(models.Model):

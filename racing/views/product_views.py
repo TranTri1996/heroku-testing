@@ -1,7 +1,7 @@
 from racing.base.base_views import PrivatePostAPIView, PrivateGetAPIView
 from racing.constants import Result
 from racing.mangers import product_manager
-from racing.models import Product, Accessory
+from racing.models import Product
 from racing.serializers import CreateProductSerializer, GetPersonalProductListSerializer
 
 
@@ -15,7 +15,7 @@ class CreateProductView(PrivatePostAPIView):
             name=data["name"],
             description=data.get("description", ""),
             price=data.get("price", 0.0),
-            product_type=data["accessory_type"]
+            accessory_id=data["accessory_id"]
         )
 
         product_response = product_manager.generate_product_response(product)
@@ -31,7 +31,7 @@ class GetPersonalProductListView(PrivateGetAPIView):
     serializer_class = GetPersonalProductListSerializer
 
     def process(self, data):
-        products = list(Product.objects.filter(user_id=data["user_id"]))
+        products = list(Product.objects.filter(user_id=self.user_id))
         product_response_list = []
         for p in products:
             product_response = product_manager.generate_product_response(p)
